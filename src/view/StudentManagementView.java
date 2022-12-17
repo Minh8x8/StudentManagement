@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.ScrollPane;
 import java.awt.Toolkit;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -23,6 +24,7 @@ import model.StudentManagementModel;
 
 import java.awt.Color;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -41,6 +43,7 @@ public class StudentManagementView extends JFrame {
     private JTextField textField_total;
     private JTextField textField_status;
     private JTable table;
+    private DefaultTableModel model_table;
     private StudentManagementModel model;
 
     /**
@@ -63,6 +66,12 @@ public class StudentManagementView extends JFrame {
      * Create the frame.
      */
     public StudentManagementView() {
+        try {
+            FlatIntelliJLaf.setup();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1000, 634);
 
@@ -76,9 +85,11 @@ public class StudentManagementView extends JFrame {
         menuBar.add(menuFile);
 
         JMenuItem menuOpen = new JMenuItem("Open");
+        menuOpen.addActionListener(action);
         menuFile.add(menuOpen);
 
         JMenuItem menuSave = new JMenuItem("Save");
+        menuSave.addActionListener(action);
         menuFile.add(menuSave);
 
         JSeparator separator = new JSeparator();
@@ -274,32 +285,41 @@ public class StudentManagementView extends JFrame {
         return new Student(name, gender, id, dob, course, total, status);
     }
     public void setFormFromTable() {
-        Student s = getStudentFromTable();
-        textField_name.setText(s.getName());
-        if (s.getGender().equals("Male")) rdbtn_male.setSelected(true);
-        else if (s.getGender().equals("Female")) rdbtn_female.setSelected(true);
-        textField_id.setText(s.getId());
-        SimpleDateFormat sdf = new SimpleDateFormat("dd - MM - yyyy");
-        Date date = null;
         try {
-            date = sdf.parse(s.getDob());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+            Student s = getStudentFromTable();
+            textField_name.setText(s.getName());
+            if (s.getGender().equals("Male")) rdbtn_male.setSelected(true);
+            else if (s.getGender().equals("Female")) rdbtn_female.setSelected(true);
+            textField_id.setText(s.getId());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd - MM - yyyy");
+            Date date = null;
+            try {
+                date = sdf.parse(s.getDob());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            dateChooser.setDate(date);
+            comboBox_course.setSelectedItem(s.getCourse().getId());
+            textField_total.setText(String.valueOf(s.getTotal()));
+            textField_status.setText(s.getStatus());
         }
-        dateChooser.setDate(date);
-        comboBox_course.setSelectedItem(s.getCourse().getId());
-        textField_total.setText(String.valueOf(s.getTotal()));
-        textField_status.setText(s.getStatus());
+        catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public Student getStudentFromTable() {
-        DefaultTableModel model_table = (DefaultTableModel) table.getModel();
         int row = table.getSelectedRow();
+        if (sorter!=null) {
+            int rowInModel = sorter.convertRowIndexToModel(row);
+            row = rowInModel;
+        }
+        if (row == -1) return new Student();
         String name, gender, id, dobString, courseString, total, status = "";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd - MM - yyyy");
         name = model_table.getValueAt(row, 0).toString();
-        gender = model_table.getValueAt(row, 1).toString();
-        id = model_table.getValueAt(row, 2).toString();
+        gender = model_table.getValueAt(row, 2).toString();
+        id = model_table.getValueAt(row, 1).toString();
         dobString = model_table.getValueAt(row, 3).toString();
         Date dob;
         try {
@@ -315,27 +335,33 @@ public class StudentManagementView extends JFrame {
     }
 
     public void addStudentToTable(Student s) {
-        DefaultTableModel model_table = (DefaultTableModel) table.getModel();
+        model_table = (DefaultTableModel) table.getModel();
         try {
             model_table.addRow(new Object[]{
-                    s.getName(), s.getGender(), s.getId(), s.getDob(), s.getCourse().getId(), s.getTotal(), s.getStatus()
+                    s.getName(), s.getId(), s.getGender(), s.getDob(), s.getCourse().getId(), s.getTotal(), s.getStatus()
             });
-            this.model.addStudent(s);
 
         }
         catch (Exception e) {
             JOptionPane.showMessageDialog(null,"Can not add to table", "ERROR", 0);
         }
     }
+    public void addStudentToModel(Student s) {
+        this.model.addStudent(s);
+    }
 
     public void saveUpdate() {
-        DefaultTableModel model_table = (DefaultTableModel) table.getModel();
+        model_table = (DefaultTableModel) table.getModel();
         int row = table.getSelectedRow();
+        if (sorter!=null) {
+            int rowInModel = sorter.convertRowIndexToModel(row);
+            row = rowInModel;
+        }
         if (row < 0) return;
         Student s = getStudentFromForm();
         model_table.setValueAt(s.getName(), row, 0);
-        model_table.setValueAt(s.getGender(), row, 1);
-        model_table.setValueAt(s.getId(), row, 2);
+        model_table.setValueAt(s.getId(), row, 1);
+        model_table.setValueAt(s.getGender(), row, 2);
         model_table.setValueAt(s.getDob(), row, 3);
         model_table.setValueAt(s.getCourse() == null ? "" : s.getCourse().getId(), row, 4);
         model_table.setValueAt(s.getTotal(), row, 5);
@@ -344,8 +370,12 @@ public class StudentManagementView extends JFrame {
     }
 
     public void deleteStudentFromTable() {
-        DefaultTableModel model_table = (DefaultTableModel) table.getModel();
+        model_table = (DefaultTableModel) table.getModel();
         int row = table.getSelectedRow();
+        if (sorter!=null) {
+            int rowInModel = sorter.convertRowIndexToModel(row);
+            row = rowInModel;
+        }
         if (row<0) return;
         int isDelete = JOptionPane.showConfirmDialog(this, "Delete confirm");
         if (isDelete == JOptionPane.YES_OPTION) {
@@ -354,7 +384,81 @@ public class StudentManagementView extends JFrame {
         }
     }
 
+    public TableRowSorter<DefaultTableModel> sorter;
     public void search() {
         String search = textField_search.getText();
+        RowFilter<DefaultTableModel, Object> rf = RowFilter.regexFilter(search, 0);
+        model_table = (DefaultTableModel) table.getModel();
+        sorter = new TableRowSorter<>(model_table);
+        sorter.setRowFilter(rf);
+        table.setRowSorter(sorter);
+    }
+
+    public void saveFile(String path) {
+        try {
+            this.model.setFileName(path);
+            FileOutputStream fos = new FileOutputStream(path);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            for (Student student : this.model.getStudentList()) {
+                oos.writeObject(student);
+            }
+            oos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void saveFile(){
+        if(this.model.getFileName().length()>0) {
+            saveFile(this.model.getFileName());
+        }else {
+            JFileChooser fc = new JFileChooser();
+            int returnVal = fc.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                saveFile(file.getAbsolutePath());
+            }
+        }
+    }
+    public void openFile() {
+        JFileChooser fc = new JFileChooser();
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            openFile(file);
+                reloadTable();
+        }
+    }
+    public void openFile(File file) {
+        ArrayList<Student> ds = new ArrayList<Student>();
+        try {
+            this.model.setFileName(file.getAbsolutePath());
+            FileInputStream fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            Student st = null;
+            while((st = (Student) ois.readObject())!=null) {
+                ds.add(st);
+            }
+            ois.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        this.model.setStudentList(ds);
+    }
+    public void reloadTable() {
+        while (true) {
+            DefaultTableModel model_table = (DefaultTableModel) table.getModel();
+            int soLuongDong = model_table.getRowCount();
+            if(soLuongDong==0)
+                break;
+            else
+                try {
+                    model_table.removeRow(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        }
+        for (Student st : this.model.getStudentList()) {
+            this.addStudentToTable(st);
+        }
     }
 }

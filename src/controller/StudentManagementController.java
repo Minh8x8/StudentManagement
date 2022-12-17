@@ -23,6 +23,7 @@ public class StudentManagementController implements Action{
                 Student s = this.view.getStudentFromForm();
                 this.view.addStudentToTable(s);
                 this.view.deleteForm();
+                this.view.addStudentToModel(s);
                 break;
             case "Update":
                 this.view.setFormFromTable();
@@ -38,6 +39,11 @@ public class StudentManagementController implements Action{
             case "Search":
                 this.view.search();
                 break;
+            case "Save":
+                this.view.saveFile();
+                break;
+            case "Open":
+                this.view.openFile();
         }
     }
 

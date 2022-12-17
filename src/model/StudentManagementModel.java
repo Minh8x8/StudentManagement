@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class StudentManagementModel {
     private ArrayList<Student> studentList = new ArrayList<Student>();
+    private String fileName;
 
     public ArrayList<Student> getStudentList() {
         return studentList;
@@ -15,11 +16,14 @@ public class StudentManagementModel {
 
     public void addStudent(Student student) {this.studentList.add(student);}
 
-    public StudentManagementModel() {}
+    public StudentManagementModel() {this.fileName = "";}
 
     public StudentManagementModel(ArrayList<Student> stList) {
         this.studentList = stList;
+        this.fileName = "";
     }
+    public void setFileName(String fileName) {this.fileName = fileName;}
+    public String getFileName() {return this.fileName;}
 
     public void insertStudent(Student student) {
         this.studentList.add(student);
