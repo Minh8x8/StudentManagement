@@ -20,10 +20,10 @@ public class StudentManagementController implements Action{
         String command = e.getActionCommand();
         switch (command) {
             case "Add":
-                Student s = this.view.getStudentFromForm();
-                this.view.addStudentToTable(s);
-                this.view.deleteForm();
-                this.view.addStudentToModel(s);
+                Student s = this.view.getStudentFromForm("Add");
+                //this.view.addStudentToTable(s);
+                //this.view.deleteForm();
+                //this.view.addStudentToModel(s);
                 break;
             case "Update":
                 this.view.setFormFromTable();

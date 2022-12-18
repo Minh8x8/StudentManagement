@@ -44,6 +44,7 @@ public class StudentManagementView extends JFrame {
     private JTextField textField_status;
     private JTable table;
     private DefaultTableModel model_table;
+    public TableRowSorter<DefaultTableModel> sorter;
     private StudentManagementModel model;
 
     /**
@@ -253,59 +254,99 @@ public class StudentManagementView extends JFrame {
         textField_name.setText("");
         btng_gender.clearSelection();
         textField_id.setText("");
+        dateChooser.setDate(null);
         comboBox_course.setSelectedIndex(-1);
         textField_total.setText("");
         textField_status.setText("");
     }
 
-    public Student getStudentFromForm() {
+    public Student getStudentFromForm(String cmd) {
+        String errorEmpty = "";
+        String errorInput = "";
         String name = textField_name.getText();
+        if (name.length() == 0) {
+            errorEmpty+="\nName is empty";
+        }
         String gender = "";
         if (rdbtn_male.isSelected()) gender = "Male";
         else if (rdbtn_female.isSelected()) gender = "Female";
-        else JOptionPane.showMessageDialog(null, "Gender is not selected", "FORM ERROR", JOptionPane.ERROR_MESSAGE);
+        else {
+            errorEmpty+="\nGender is not selected";
+        }
         String id = textField_id.getText();
+        if (id.length() == 0) {
+            errorEmpty+="\nID is empty";
+        }
         Date dob = dateChooser.getDate();
+        if (dob == null) {
+            errorEmpty+="\nDob is empty";
+        }
         String courseName = "";
         try {
             courseName = comboBox_course.getSelectedItem().toString();
         }
         catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Course is null", "Course Error", JOptionPane.ERROR_MESSAGE);
+            errorEmpty+="\nCourse is null";
         }
         Course course = Course.getCourseById(courseName);
         float total = 0;
         try {
-            total = Float.parseFloat(textField_total.getText());
+            String floatString = textField_total.getText();
+            if (floatString.length() == 0) {
+                errorEmpty+="\nTotal is emty";
+            }
+            else total = Float.parseFloat(floatString);
         }
         catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Number Error", JOptionPane.ERROR_MESSAGE);
+            errorInput= errorInput + "\n" + e.getMessage();
         }
         String status = textField_status.getText();
-        return new Student(name, gender, id, dob, course, total, status);
+        if (status.length() == 0) {
+            errorEmpty+="\nStatus is empty";
+        }
+        int jOption = JOptionPane.NO_OPTION;
+        Student student = new Student(name, gender, id, dob, course, total, status);
+        if (errorInput.length() > 0) {
+            JOptionPane.showMessageDialog(null, errorInput, "ERROR INPUT", JOptionPane.ERROR_MESSAGE);
+        }
+        else if (errorEmpty.length() > 0 && cmd.equals("Add")) {
+            jOption = JOptionPane.showConfirmDialog(null, errorEmpty + "\n\n Do you still want add to table?", "FORM ERROR", JOptionPane.INFORMATION_MESSAGE);
+        }
+        if (cmd == "Add" && jOption == JOptionPane.YES_OPTION || cmd == "Add" && errorEmpty.length() == 0) {
+            addStudentToTable(student);
+            deleteForm();
+            addStudentToModel(student);
+        }
+        return student;
     }
     public void setFormFromTable() {
-        try {
-            Student s = getStudentFromTable();
-            textField_name.setText(s.getName());
-            if (s.getGender().equals("Male")) rdbtn_male.setSelected(true);
-            else if (s.getGender().equals("Female")) rdbtn_female.setSelected(true);
-            textField_id.setText(s.getId());
-            SimpleDateFormat sdf = new SimpleDateFormat("dd - MM - yyyy");
-            Date date = null;
+
+        Student s = getStudentFromTable();
+        textField_name.setText(s.getName());
+        if (s.getGender() == null) {
+
+        }
+        else if (s.getGender().equals("Male")) rdbtn_male.setSelected(true);
+        else if (s.getGender().equals("Female")) rdbtn_female.setSelected(true);
+        textField_id.setText(s.getId());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd - MM - yyyy");
+        Date date = null;
+        if (s.getDob().equals("")) {
+            dateChooser.setDate(null);
+        }
+        else {
             try {
                 date = sdf.parse(s.getDob());
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
             dateChooser.setDate(date);
+        }
+        if (s.getCourse() != null) {
             comboBox_course.setSelectedItem(s.getCourse().getId());
-            textField_total.setText(String.valueOf(s.getTotal()));
-            textField_status.setText(s.getStatus());
         }
-        catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
-        }
+        textField_total.setText(String.valueOf(s.getTotal()));
+        textField_status.setText(s.getStatus());
     }
 
     public Student getStudentFromTable() {
@@ -321,11 +362,13 @@ public class StudentManagementView extends JFrame {
         gender = model_table.getValueAt(row, 2).toString();
         id = model_table.getValueAt(row, 1).toString();
         dobString = model_table.getValueAt(row, 3).toString();
-        Date dob;
-        try {
-            dob = simpleDateFormat.parse(dobString);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+        Date dob = null;
+        if (!dobString.equals("")) {
+            try {
+                dob = simpleDateFormat.parse(dobString);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
         courseString = model_table.getValueAt(row, 4).toString();
         Course course = Course.getCourseById(courseString);
@@ -338,12 +381,13 @@ public class StudentManagementView extends JFrame {
         model_table = (DefaultTableModel) table.getModel();
         try {
             model_table.addRow(new Object[]{
-                    s.getName(), s.getId(), s.getGender(), s.getDob(), s.getCourse().getId(), s.getTotal(), s.getStatus()
+                    s.getName(), s.getId(), s.getGender(), s.getDob(), s.getCourse() == null ? "" : s.getCourse().getId(), s.getTotal(), s.getStatus()
             });
 
         }
         catch (Exception e) {
-            JOptionPane.showMessageDialog(null,"Can not add to table", "ERROR", 0);
+//            JOptionPane.showMessageDialog(null,"Can not add to table", "ERROR", 0);
+            e.printStackTrace();
         }
     }
     public void addStudentToModel(Student s) {
@@ -358,7 +402,7 @@ public class StudentManagementView extends JFrame {
             row = rowInModel;
         }
         if (row < 0) return;
-        Student s = getStudentFromForm();
+        Student s = getStudentFromForm("SaveUpdate");
         model_table.setValueAt(s.getName(), row, 0);
         model_table.setValueAt(s.getId(), row, 1);
         model_table.setValueAt(s.getGender(), row, 2);
@@ -367,6 +411,7 @@ public class StudentManagementView extends JFrame {
         model_table.setValueAt(s.getTotal(), row, 5);
         model_table.setValueAt(s.getStatus(), row, 6);
         model.updateStudent(s, row);
+        deleteForm();
     }
 
     public void deleteStudentFromTable() {
@@ -384,7 +429,6 @@ public class StudentManagementView extends JFrame {
         }
     }
 
-    public TableRowSorter<DefaultTableModel> sorter;
     public void search() {
         String search = textField_search.getText();
         RowFilter<DefaultTableModel, Object> rf = RowFilter.regexFilter(search, 0);
@@ -447,8 +491,8 @@ public class StudentManagementView extends JFrame {
     public void reloadTable() {
         while (true) {
             DefaultTableModel model_table = (DefaultTableModel) table.getModel();
-            int soLuongDong = model_table.getRowCount();
-            if(soLuongDong==0)
+            int rowNum = model_table.getRowCount();
+            if(rowNum==0)
                 break;
             else
                 try {
