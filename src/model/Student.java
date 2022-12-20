@@ -97,6 +97,14 @@ public class Student implements Serializable {
                 ", status='" + status + '\'' +
                 '}';
     }
+    public boolean isTheSameStudent(Student student) {
+        if (this.name == student.name
+        && this.gender == student.gender
+        && this.id == student.id
+        && this.dob == student.dob
+        ) return true;
+        return false;
+    }
 
     @Override
     public boolean equals(Object o) {

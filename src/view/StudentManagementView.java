@@ -33,19 +33,12 @@ public class StudentManagementView extends JFrame {
     private JPanel contentPane;
     private JMenu menuFile;
     private JTextField textField_search;
-    private JTextField textField_name;
-    private JRadioButton rdbtn_male;
-    private JRadioButton rdbtn_female;
     private ButtonGroup btng_gender;
-    private JTextField textField_id;
-    private JDateChooser dateChooser;
-    private JComboBox comboBox_course;
-    private JTextField textField_total;
-    private JTextField textField_status;
-    private JTable table;
-    private DefaultTableModel model_table;
-    public TableRowSorter<DefaultTableModel> sorter;
-    private StudentManagementModel model;
+    public static JTable table;
+    private static DefaultTableModel model_table;
+    public static TableRowSorter<DefaultTableModel> sorter;
+    public static StudentManagementModel model;
+    public FormInputView formInputView;
 
     /**
      * Launch the application.
@@ -68,7 +61,8 @@ public class StudentManagementView extends JFrame {
      */
     public StudentManagementView() {
         try {
-            FlatIntelliJLaf.setup();
+            String theme = "com.formdev.flatlaf.FlatIntelliJLaf";
+            UIManager.setLookAndFeel(theme);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -78,6 +72,7 @@ public class StudentManagementView extends JFrame {
 
         Action action = new StudentManagementController(this);
         model = new StudentManagementModel();
+        formInputView = new FormInputView();
 
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -111,110 +106,28 @@ public class StudentManagementView extends JFrame {
         contentPane.setLayout(null);
 
         textField_search = new JTextField();
-        textField_search.setBounds(571, 11, 150, 35);
+        textField_search.setBounds(606, 30, 150, 35);
         contentPane.add(textField_search);
         textField_search.setColumns(10);
 
         JButton btn_search = new JButton("Search");
         btn_search.addActionListener(action);
-        btn_search.setBounds(748, 11, 100, 35);
+        btn_search.setBounds(776, 30, 100, 35);
         contentPane.add(btn_search);
-
-        JLabel lb_name = new JLabel("Name");
-        lb_name.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_name.setBounds(10, 100, 70, 35);
-        contentPane.add(lb_name);
-
-        JLabel lb_gender = new JLabel("Gender");
-        lb_gender.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_gender.setBounds(10, 150, 70, 35);
-        contentPane.add(lb_gender);
-
-        JLabel lb_id = new JLabel("ID");
-        lb_id.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_id.setBounds(10, 200, 70, 35);
-        contentPane.add(lb_id);
-
-        JLabel lb_dob = new JLabel("DoB");
-        lb_dob.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_dob.setBounds(10, 250, 70, 35);
-        contentPane.add(lb_dob);
-
-        JLabel lb_course = new JLabel("Course");
-        lb_course.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_course.setBounds(10, 300, 70, 35);
-        contentPane.add(lb_course);
-
-        JLabel lb_total = new JLabel("Total");
-        lb_total.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_total.setBounds(10, 350, 70, 35);
-        contentPane.add(lb_total);
-
-        JLabel lb_status = new JLabel("Status");
-        lb_status.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        lb_status.setBounds(10, 400, 70, 35);
-        contentPane.add(lb_status);
-
-        textField_name = new JTextField();
-        textField_name.setBounds(77, 101, 150, 35);
-        contentPane.add(textField_name);
-        textField_name.setColumns(10);
-
-        textField_id = new JTextField();
-        textField_id.setColumns(10);
-        textField_id.setBounds(77, 201, 150, 35);
-        contentPane.add(textField_id);
-
-        textField_total = new JTextField();
-        textField_total.setColumns(10);
-        textField_total.setBounds(77, 351, 150, 35);
-        contentPane.add(textField_total);
-
-        textField_status = new JTextField();
-        textField_status.setColumns(10);
-        textField_status.setBounds(77, 401, 150, 35);
-        contentPane.add(textField_status);
-
-        rdbtn_male = new JRadioButton("Male");
-        rdbtn_male.setBounds(78, 157, 70, 23);
-        contentPane.add(rdbtn_male);
-
-        rdbtn_female = new JRadioButton("Female");
-        rdbtn_female.setBounds(150, 157, 70, 23);
-        contentPane.add(rdbtn_female);
-
-        btng_gender = new ButtonGroup();
-        btng_gender.add(rdbtn_male);
-        btng_gender.add(rdbtn_female);
-
-        dateChooser = new JDateChooser();
-        dateChooser.setBackground(new Color(255, 255, 255));
-        dateChooser.setDateFormatString("dd - MM - yyyy");
-        dateChooser.setBounds(77, 250, 150, 35);
-        contentPane.add(dateChooser);
-
-        comboBox_course = new JComboBox();
-        comboBox_course.setBounds(77, 301, 150, 35);
-        ArrayList<Course> courseList = Course.getCourseList();
-        for (Course c : courseList) {
-            comboBox_course.addItem(c.getId());
-        }
-        comboBox_course.setSelectedIndex(-1);
-        contentPane.add(comboBox_course);
 
         JButton btn_add = new JButton("Add");
         btn_add.addActionListener(action);
-        btn_add.setBounds(10, 457, 108, 35);
+        btn_add.setBounds(56, 109, 134, 35);
         contentPane.add(btn_add);
 
         JButton btn_update = new JButton("Update");
         btn_update.addActionListener(action);
-        btn_update.setBounds(10, 500, 108, 35);
+        btn_update.setBounds(56, 182, 134, 35);
         contentPane.add(btn_update);
 
         JButton btn_delete = new JButton("Delete");
         btn_delete.addActionListener(action);
-        btn_delete.setBounds(142, 457, 108, 35);
+        btn_delete.setBounds(56, 253, 134, 35);
         contentPane.add(btn_delete);
 
         JScrollPane scrollPane = new JScrollPane();
@@ -231,15 +144,10 @@ public class StudentManagementView extends JFrame {
                 }
         ));
 
-        JButton btn_saveUpdate = new JButton("Save Update");
-        btn_saveUpdate.addActionListener(action);
-        btn_saveUpdate.setBounds(142, 500, 108, 35);
-        contentPane.add(btn_saveUpdate);
-
-        JButton btn_clear = new JButton("Clear");
-        btn_clear.addActionListener(action);
-        btn_clear.setBounds(74, 540, 108, 35);
-        contentPane.add(btn_clear);
+        JButton btn_clearSearch = new JButton("Clear");
+        btn_clearSearch.addActionListener(action);
+        btn_clearSearch.setBounds(886, 30, 90, 35);
+        contentPane.add(btn_clearSearch);
 
         table.getColumnModel().getColumn(0).setPreferredWidth(90);
         table.getColumnModel().getColumn(1).setPreferredWidth(80);
@@ -250,106 +158,9 @@ public class StudentManagementView extends JFrame {
         table.getColumnModel().getColumn(6).setPreferredWidth(70);
 
     }
-    public void deleteForm() {
-        textField_name.setText("");
-        btng_gender.clearSelection();
-        textField_id.setText("");
-        dateChooser.setDate(null);
-        comboBox_course.setSelectedIndex(-1);
-        textField_total.setText("");
-        textField_status.setText("");
-    }
-
-    public Student getStudentFromForm(String cmd) {
-        String errorEmpty = "";
-        String errorInput = "";
-        String name = textField_name.getText();
-        if (name.length() == 0) {
-            errorEmpty+="\nName is empty";
-        }
-        String gender = "";
-        if (rdbtn_male.isSelected()) gender = "Male";
-        else if (rdbtn_female.isSelected()) gender = "Female";
-        else {
-            errorEmpty+="\nGender is not selected";
-        }
-        String id = textField_id.getText();
-        if (id.length() == 0) {
-            errorEmpty+="\nID is empty";
-        }
-        Date dob = dateChooser.getDate();
-        if (dob == null) {
-            errorEmpty+="\nDob is empty";
-        }
-        String courseName = "";
-        try {
-            courseName = comboBox_course.getSelectedItem().toString();
-        }
-        catch (Exception e) {
-            errorEmpty+="\nCourse is null";
-        }
-        Course course = Course.getCourseById(courseName);
-        float total = 0;
-        try {
-            String floatString = textField_total.getText();
-            if (floatString.length() == 0) {
-                errorEmpty+="\nTotal is emty";
-            }
-            else total = Float.parseFloat(floatString);
-        }
-        catch (Exception e) {
-            errorInput= errorInput + "\n" + e.getMessage();
-        }
-        String status = textField_status.getText();
-        if (status.length() == 0) {
-            errorEmpty+="\nStatus is empty";
-        }
-        int jOption = JOptionPane.NO_OPTION;
-        Student student = new Student(name, gender, id, dob, course, total, status);
-        if (errorInput.length() > 0) {
-            JOptionPane.showMessageDialog(null, errorInput, "ERROR INPUT", JOptionPane.ERROR_MESSAGE);
-        }
-        else if (errorEmpty.length() > 0 && cmd.equals("Add")) {
-            jOption = JOptionPane.showConfirmDialog(null, errorEmpty + "\n\n Do you still want add to table?", "FORM ERROR", JOptionPane.INFORMATION_MESSAGE);
-        }
-        if (cmd == "Add" && jOption == JOptionPane.YES_OPTION || cmd == "Add" && errorEmpty.length() == 0) {
-            addStudentToTable(student);
-            deleteForm();
-            addStudentToModel(student);
-        }
-        return student;
-    }
-    public void setFormFromTable() {
-
-        Student s = getStudentFromTable();
-        textField_name.setText(s.getName());
-        if (s.getGender() == null) {
-
-        }
-        else if (s.getGender().equals("Male")) rdbtn_male.setSelected(true);
-        else if (s.getGender().equals("Female")) rdbtn_female.setSelected(true);
-        textField_id.setText(s.getId());
-        SimpleDateFormat sdf = new SimpleDateFormat("dd - MM - yyyy");
-        Date date = null;
-        if (s.getDob().equals("")) {
-            dateChooser.setDate(null);
-        }
-        else {
-            try {
-                date = sdf.parse(s.getDob());
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-            dateChooser.setDate(date);
-        }
-        if (s.getCourse() != null) {
-            comboBox_course.setSelectedItem(s.getCourse().getId());
-        }
-        textField_total.setText(String.valueOf(s.getTotal()));
-        textField_status.setText(s.getStatus());
-    }
 
     public Student getStudentFromTable() {
+        model_table = (DefaultTableModel) table.getModel();
         int row = table.getSelectedRow();
         if (sorter!=null) {
             int rowInModel = sorter.convertRowIndexToModel(row);
@@ -377,8 +188,8 @@ public class StudentManagementView extends JFrame {
         return new Student(name, gender, id, dob, course, Float.parseFloat(total), status);
     }
 
-    public void addStudentToTable(Student s) {
-        model_table = (DefaultTableModel) table.getModel();
+    public static void addStudentToTable(Student s) {
+        DefaultTableModel model_table = (DefaultTableModel) table.getModel();
         try {
             model_table.addRow(new Object[]{
                     s.getName(), s.getId(), s.getGender(), s.getDob(), s.getCourse() == null ? "" : s.getCourse().getId(), s.getTotal(), s.getStatus()
@@ -390,11 +201,12 @@ public class StudentManagementView extends JFrame {
             e.printStackTrace();
         }
     }
-    public void addStudentToModel(Student s) {
-        this.model.addStudent(s);
+    public static void addStudentToModel(Student s) {
+        model.addStudent(s);
+        System.out.println(model);
     }
 
-    public void saveUpdate() {
+    public static void saveUpdate(Student s) {
         model_table = (DefaultTableModel) table.getModel();
         int row = table.getSelectedRow();
         if (sorter!=null) {
@@ -402,7 +214,6 @@ public class StudentManagementView extends JFrame {
             row = rowInModel;
         }
         if (row < 0) return;
-        Student s = getStudentFromForm("SaveUpdate");
         model_table.setValueAt(s.getName(), row, 0);
         model_table.setValueAt(s.getId(), row, 1);
         model_table.setValueAt(s.getGender(), row, 2);
@@ -411,7 +222,6 @@ public class StudentManagementView extends JFrame {
         model_table.setValueAt(s.getTotal(), row, 5);
         model_table.setValueAt(s.getStatus(), row, 6);
         model.updateStudent(s, row);
-        deleteForm();
     }
 
     public void deleteStudentFromTable() {
@@ -437,6 +247,14 @@ public class StudentManagementView extends JFrame {
         sorter.setRowFilter(rf);
         table.setRowSorter(sorter);
     }
+    public void clearSearch() {
+        String search = "";
+        RowFilter<DefaultTableModel, Object> rf = RowFilter.regexFilter(search, 0);
+        model_table = (DefaultTableModel) table.getModel();
+        sorter = new TableRowSorter<>(model_table);
+        sorter.setRowFilter(rf);
+        table.setRowSorter(sorter);
+    }
 
     public void saveFile(String path) {
         try {
@@ -447,6 +265,7 @@ public class StudentManagementView extends JFrame {
                 oos.writeObject(student);
             }
             oos.close();
+            JOptionPane.showMessageDialog(null, "Save successful", "Save!", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -469,7 +288,7 @@ public class StudentManagementView extends JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             openFile(file);
-                reloadTable();
+            reloadTable();
         }
     }
     public void openFile(File file) {
@@ -483,6 +302,7 @@ public class StudentManagementView extends JFrame {
                 ds.add(st);
             }
             ois.close();
+            fis.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
