@@ -31,6 +31,8 @@ public class StudentManagementController {
         this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
     public void updateButton() {
+        int row = view.table.getSelectedRow();
+        if (row == -1) return;
         this.view.formInputView.setCommand("Update");
         Student student = getStudentFromTable();
         this.view.formInputView.setFormFromTable(student);
@@ -69,11 +71,19 @@ public class StudentManagementController {
     public void deleteButton() {
         view.model_table = (DefaultTableModel) view.table.getModel();
         int row = view.table.getSelectedRow();
-        if (view.sorter!=null) {
-            int rowInModel = view.sorter.convertRowIndexToModel(row);
+        if (view.sorter==null) return;
+        if (view.sorter!=null && view.sorter.getModelRowCount()>0) {
+            int rowInModel =-1;
+            try {
+                rowInModel = view.sorter.convertRowIndexToModel(row);
+            }
+            catch (ArrayIndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
             row = rowInModel;
         }
-        if (row<0) return;
+        if (row<0||row==-1) return;
+
         int isDelete = JOptionPane.showConfirmDialog(view, "Delete confirm");
         if (isDelete == JOptionPane.YES_OPTION) {
             view.model_table.removeRow(row);

@@ -233,7 +233,7 @@ public class StudentManagementView extends JFrame {
         });
         scrollPane_1.setViewportView(list);
     }
-    
+
     public static void addStudentToTable(Student s) {
         DefaultTableModel model_table = (DefaultTableModel) table.getModel();
         try {
