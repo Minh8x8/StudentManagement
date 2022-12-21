@@ -1,11 +1,7 @@
 package view;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import javax.swing.*;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.ScrollPane;
-import java.awt.Toolkit;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,7 +19,6 @@ import model.Student;
 import model.StudentManagementModel;
 import model.ThemeList;
 
-import java.awt.Color;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.event.ActionListener;
@@ -76,6 +71,13 @@ public class StudentManagementView extends JFrame {
         setTitle("Student Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1000, 634);
+
+        // Set location to the center
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screenSize.width - this.getWidth()) / 2;
+        int y = (screenSize.height - this.getHeight()) / 2;
+        this.setLocation(x, y);
+        this.setVisible(true);
 
         controller = new StudentManagementController(this);
 
@@ -232,6 +234,12 @@ public class StudentManagementView extends JFrame {
             }
         });
         scrollPane_1.setViewportView(list);
+
+        JLabel lblNewLabel_theme = new JLabel("Themes:");
+        lblNewLabel_theme.setEnabled(false);
+        lblNewLabel_theme.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        lblNewLabel_theme.setBounds(41, 62, 184, 26);
+        settingPane.add(lblNewLabel_theme);
     }
 
     public static void addStudentToTable(Student s) {

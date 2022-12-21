@@ -72,7 +72,7 @@ public class StudentManagementController {
         view.model_table = (DefaultTableModel) view.table.getModel();
         int row = view.table.getSelectedRow();
         if (view.sorter==null) return;
-        if (view.sorter!=null && view.sorter.getModelRowCount()>0) {
+        if (view.sorter!=null && view.sorter.getModelRowCount()>0 && row!=-1) {
             int rowInModel =-1;
             try {
                 rowInModel = view.sorter.convertRowIndexToModel(row);
