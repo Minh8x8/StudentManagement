@@ -2,40 +2,99 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
+import java.io.*;
 import java.text.Normalizer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import model.*;
 import view.*;
 
-public class StudentManagementController implements Action{
+public class StudentManagementController {
     public StudentManagementView view;
 
     public StudentManagementController(StudentManagementView view) {
         this.view = view;
     }
-    public void AddButton() {
+    public void addButton() {
         this.view.formInputView.setCommand("Add");
         this.view.formInputView.deleteForm();
         this.view.formInputView.setVisible(true);
         this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
-    public void UpdateButton() {
+    public void updateButton() {
         this.view.formInputView.setCommand("Update");
-        Student student = this.view.getStudentFromTable();
+        Student student = getStudentFromTable();
         this.view.formInputView.setFormFromTable(student);
         this.view.formInputView.setVisible(true);
         this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
-    public void DeleteButton() {
-        this.view.deleteStudentFromTable();
+    public Student getStudentFromTable() {
+        view.model_table = (DefaultTableModel) view.table.getModel();
+        int row = view.table.getSelectedRow();
+        if (view.sorter!=null) {
+            int rowInModel = view.sorter.convertRowIndexToModel(row);
+            row = rowInModel;
+        }
+        if (row == -1) return new Student();
+        String name, gender, id, dobString, courseString, total, status = "";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd - MM - yyyy");
+        name = view.model_table.getValueAt(row, 0).toString();
+        gender = view.model_table.getValueAt(row, 2).toString();
+        id = view.model_table.getValueAt(row, 1).toString();
+        dobString = view.model_table.getValueAt(row, 3).toString();
+        Date dob = null;
+        if (!dobString.equals("")) {
+            try {
+                dob = simpleDateFormat.parse(dobString);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        courseString = view.model_table.getValueAt(row, 4).toString();
+        Course course = Course.getCourseById(courseString);
+        total = view.model_table.getValueAt(row, 5).toString();
+        status = view.model_table.getValueAt(row, 6).toString();
+        return new Student(name, gender, id, dob, course, Float.parseFloat(total), status);
     }
-    public void SearchButton() {
-        this.view.search();
+
+    public void deleteButton() {
+        view.model_table = (DefaultTableModel) view.table.getModel();
+        int row = view.table.getSelectedRow();
+        if (view.sorter!=null) {
+            int rowInModel = view.sorter.convertRowIndexToModel(row);
+            row = rowInModel;
+        }
+        if (row<0) return;
+        int isDelete = JOptionPane.showConfirmDialog(view, "Delete confirm");
+        if (isDelete == JOptionPane.YES_OPTION) {
+            view.model_table.removeRow(row);
+            view.model.deleteStudent(row);
+        }
+    }
+    public void searchButton() {
+        String search = view.textField_search.getText();
+        RowFilter<DefaultTableModel, Object> rf = RowFilter.regexFilter(search, 0);
+        view.model_table = (DefaultTableModel) view.table.getModel();
+        view.sorter = new TableRowSorter<>(view.model_table);
+        view.sorter.setRowFilter(rf);
+        view.table.setRowSorter(view.sorter);
+    }
+    public void clearSearchButton() {
+        String search = "";
+        RowFilter<DefaultTableModel, Object> rf = RowFilter.regexFilter(search, 0);
+        view.model_table = (DefaultTableModel) view.table.getModel();
+        view.sorter = new TableRowSorter<>(view.model_table);
+        view.sorter.setRowFilter(rf);
+        view.table.setRowSorter(view.sorter);
     }
     public void setTheme(int index) {
         ThemeList themeList = new ThemeList();
@@ -51,40 +110,79 @@ public class StudentManagementController implements Action{
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String command = e.getActionCommand();
-        switch (command) {
-            case "Add":
-                //Student s = this.view.getStudentFromForm("Add");
-                    this.view.formInputView.setCommand("Add");
-                    this.view.formInputView.deleteForm();
-                    this.view.formInputView.setVisible(true);
-                    this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    public void menupen() {
+        openFile();
+    }
+    public void openFile() {
+        JFileChooser fc = new JFileChooser();
+        int returnVal = fc.showOpenDialog(view);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            openFile(file);
+            reloadTable();
+        }
+    }
+    public void openFile(File file) {
+        ArrayList<Student> ds = new ArrayList<Student>();
+        try {
+            view.model.setFileName(file.getAbsolutePath());
+            FileInputStream fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            Student st = null;
+            while((st = (Student) ois.readObject())!=null) {
+                ds.add(st);
+            }
+            ois.close();
+            fis.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        view.model.setStudentList(ds);
+    }
+    public void reloadTable() {
+        while (true) {
+            DefaultTableModel model_table = (DefaultTableModel) view.table.getModel();
+            int rowNum = model_table.getRowCount();
+            if(rowNum==0)
                 break;
-            case "Update":
-                //this.view.setFormFromTable();
-                this.view.formInputView.setCommand("Update");
-                Student student = this.view.getStudentFromTable();
-                this.view.formInputView.setFormFromTable(student);
-                this.view.formInputView.setVisible(true);
-                this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                break;
-            case "Delete":
-                this.view.deleteStudentFromTable();
-            case "Search":
-                this.view.search();
-                break;
-            case "Clear":
-                this.view.clearSearch();
-                break;
-            case "Save":
-                this.view.saveFile();
-                break;
-            case "Open":
-                this.view.openFile();
-                break;
+            else
+                try {
+                    model_table.removeRow(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        }
+        for (Student st : view.model.getStudentList()) {
+            view.addStudentToTable(st);
+        }
+    }
+    public void menuSave() {
+        saveFile();
+    }
+    public void saveFile(){
+        if(view.model.getFileName().length()>0) {
+            saveFile(view.model.getFileName());
+        }else {
+            JFileChooser fc = new JFileChooser();
+            int returnVal = fc.showSaveDialog(view);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                saveFile(file.getAbsolutePath());
+            }
+        }
+    }
+    public void saveFile(String path) {
+        try {
+            view.model.setFileName(path);
+            FileOutputStream fos = new FileOutputStream(path);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            for (Student student : view.model.getStudentList()) {
+                oos.writeObject(student);
+            }
+            oos.close();
+            JOptionPane.showMessageDialog(null, "Save successful", "Save!", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     public void test() {
@@ -97,42 +195,6 @@ public class StudentManagementController implements Action{
             values.add(value);
         }
         System.out.println(values);
-    }
-
-    @Override
-    public Object getValue(String key) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void putValue(String key, Object value) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setEnabled(boolean b) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean isEnabled() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        // TODO Auto-generated method stub
-
     }
 }
 
