@@ -18,6 +18,39 @@ public class StudentManagementController implements Action{
     public StudentManagementController(StudentManagementView view) {
         this.view = view;
     }
+    public void AddButton() {
+        this.view.formInputView.setCommand("Add");
+        this.view.formInputView.deleteForm();
+        this.view.formInputView.setVisible(true);
+        this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+    public void UpdateButton() {
+        this.view.formInputView.setCommand("Update");
+        Student student = this.view.getStudentFromTable();
+        this.view.formInputView.setFormFromTable(student);
+        this.view.formInputView.setVisible(true);
+        this.view.formInputView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+    public void DeleteButton() {
+        this.view.deleteStudentFromTable();
+    }
+    public void SearchButton() {
+        this.view.search();
+    }
+    public void setTheme(int index) {
+        ThemeList themeList = new ThemeList();
+        String classPathTheme = themeList.themeList[index][1];
+        try {
+            UIManager.setLookAndFeel(classPathTheme);
+            UIManager.getLookAndFeel().provideErrorFeedback(this.view);
+            SwingUtilities.updateComponentTreeUI(this.view);
+            UIManager.getLookAndFeel().provideErrorFeedback(this.view.formInputView);
+            SwingUtilities.updateComponentTreeUI(this.view.formInputView);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {

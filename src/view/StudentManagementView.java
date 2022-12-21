@@ -21,16 +21,21 @@ import controller.StudentManagementController;
 import model.Course;
 import model.Student;
 import model.StudentManagementModel;
+import model.ThemeList;
 
 import java.awt.Color;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class StudentManagementView extends JFrame {
 
-    private JPanel contentPane;
+    private JPanel Pane;
+    private JPanel homePane;
+    private JFrame jframe;
     private JMenu menuFile;
     private JTextField textField_search;
     private ButtonGroup btng_gender;
@@ -38,6 +43,7 @@ public class StudentManagementView extends JFrame {
     private static DefaultTableModel model_table;
     public static TableRowSorter<DefaultTableModel> sorter;
     public static StudentManagementModel model;
+    public static StudentManagementController controller;
     public FormInputView formInputView;
 
     /**
@@ -67,10 +73,14 @@ public class StudentManagementView extends JFrame {
         catch (Exception e) {
             e.printStackTrace();
         }
+        setTitle("Student Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1000, 634);
 
+        controller = new StudentManagementController(this);
         Action action = new StudentManagementController(this);
+
+
         model = new StudentManagementModel();
         formInputView = new FormInputView();
 
@@ -99,40 +109,48 @@ public class StudentManagementView extends JFrame {
 
         JMenuItem menuAboutMe = new JMenuItem("About me");
         menuAbout.add(menuAboutMe);
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        Pane = new JPanel();
+        Pane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(Pane);
+        Pane.setLayout(null);
 
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        tabbedPane.setBounds(0, 0, 986, 575);
+        Pane.add(tabbedPane);
+
+        JPanel homePane = new JPanel();
+        homePane.setLayout(null);
+        homePane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        tabbedPane.addTab("Home", null, homePane, null);
 
         textField_search = new JTextField();
-        textField_search.setBounds(606, 30, 150, 35);
-        contentPane.add(textField_search);
         textField_search.setColumns(10);
+        textField_search.setBounds(606, 30, 150, 35);
+        homePane.add(textField_search);
 
         JButton btn_search = new JButton("Search");
         btn_search.addActionListener(action);
         btn_search.setBounds(776, 30, 100, 35);
-        contentPane.add(btn_search);
+        homePane.add(btn_search);
 
         JButton btn_add = new JButton("Add");
         btn_add.addActionListener(action);
         btn_add.setBounds(56, 109, 134, 35);
-        contentPane.add(btn_add);
+        homePane.add(btn_add);
 
         JButton btn_update = new JButton("Update");
         btn_update.addActionListener(action);
         btn_update.setBounds(56, 182, 134, 35);
-        contentPane.add(btn_update);
+        homePane.add(btn_update);
 
         JButton btn_delete = new JButton("Delete");
         btn_delete.addActionListener(action);
         btn_delete.setBounds(56, 253, 134, 35);
-        contentPane.add(btn_delete);
+        homePane.add(btn_delete);
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBounds(260, 100, 716, 392);
-        contentPane.add(scrollPane);
+        homePane.add(scrollPane);
 
         table = new JTable();
         scrollPane.setViewportView(table);
@@ -147,7 +165,7 @@ public class StudentManagementView extends JFrame {
         JButton btn_clearSearch = new JButton("Clear");
         btn_clearSearch.addActionListener(action);
         btn_clearSearch.setBounds(886, 30, 90, 35);
-        contentPane.add(btn_clearSearch);
+        homePane.add(btn_clearSearch);
 
         table.getColumnModel().getColumn(0).setPreferredWidth(90);
         table.getColumnModel().getColumn(1).setPreferredWidth(80);
@@ -157,6 +175,30 @@ public class StudentManagementView extends JFrame {
         table.getColumnModel().getColumn(5).setPreferredWidth(70);
         table.getColumnModel().getColumn(6).setPreferredWidth(70);
 
+        // Setting panel
+        JPanel settingPane = new JPanel();
+        tabbedPane.addTab("Setting", null, settingPane, null);
+        settingPane.setLayout(null);
+
+        JScrollPane scrollPane_1 = new JScrollPane();
+        scrollPane_1.setBounds(41, 99, 184, 423);
+        settingPane.add(scrollPane_1);
+
+        ThemeList themeList = new ThemeList();
+        String[] theme = themeList.getThemeListName();
+        JList list = new JList(theme);
+        list.setCellRenderer(new MyListCellRenderer(new int[] {0, 5}));
+        list.setSelectionModel(new MyListSelectionModel(new int[] {0, 5}));
+        list.setSelectedIndex(1);
+        list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                int index = list.locationToIndex(evt.getPoint());
+                controller.setTheme(index);
+
+            }
+        });
+        scrollPane_1.setViewportView(list);
     }
 
     public Student getStudentFromTable() {
