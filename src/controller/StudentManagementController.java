@@ -62,7 +62,7 @@ public class StudentManagementController {
             }
         }
         courseString = view.model_table.getValueAt(row, 4).toString();
-        Course course = Course.getCourseById(courseString);
+        Course course = CourseList.getCourseById(courseString);
         total = view.model_table.getValueAt(row, 5).toString();
         status = view.model_table.getValueAt(row, 6).toString();
         return new Student(name, gender, id, dob, course, Float.parseFloat(total), status);
@@ -71,7 +71,6 @@ public class StudentManagementController {
     public void deleteButton() {
         view.model_table = (DefaultTableModel) view.table.getModel();
         int row = view.table.getSelectedRow();
-        if (view.sorter==null) return;
         if (view.sorter!=null && view.sorter.getModelRowCount()>0 && row!=-1) {
             int rowInModel =-1;
             try {
@@ -89,6 +88,7 @@ public class StudentManagementController {
             view.model_table.removeRow(row);
             view.model.deleteStudent(row);
         }
+        System.out.println(view.table.getRowCount());
     }
     public void searchButton() {
         String search = view.textField_search.getText();
@@ -120,7 +120,7 @@ public class StudentManagementController {
             e.printStackTrace();
         }
     }
-    public void menupen() {
+    public void menuOpen() {
         openFile();
     }
     public void openFile() {

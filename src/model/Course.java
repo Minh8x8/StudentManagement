@@ -2,10 +2,13 @@ package model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Course implements Serializable {
     private String id;
     private String name;
+
+    private  ArrayList<Course> courses;
 
     public String getId() {
         return id;
@@ -30,37 +33,17 @@ public class Course implements Serializable {
         this.name = name;
     }
 
-    public static Course getCourseById(String id) {
-        ArrayList<Course> courses = Course.getCourseList();
-        for (Course c : courses) {
-            if (c.getId().equals(id)) {
-                return c;
-            }
-        }
-        return null;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(courses, course.courses);
     }
 
-    public static ArrayList<Course> getCourseList() {
-        ArrayList<Course> courses = new ArrayList<Course>();
-        String[][] subject = new String[][]{
-                {"1618", "Programming"},
-                {"1619", "Networking"},
-                {"PROG102", "Procedural Programming"},
-                {"1633", "Website Design & Development"},
-                {"1620", "Professional Practice"},
-                {"1622", "Database Design & Development"},
-                {"1623", "Security"},
-                {"1631", "Software Development Life Cycles"},
-                {"WEBG301", "Project Web"},
-                {"PROG191", "Java Programming"},
-                {"1649", "Data Structures & Algorithms"},
-                {"1690", "Internet of Things"}
-        };
-        for (int i = 0; i < subject.length; i++) {
-            Course course = new Course(subject[i][0], subject[i][1]);
-            courses.add(course);
-        }
-        return courses;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, courses);
     }
 }
 

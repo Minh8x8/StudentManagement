@@ -10,6 +10,7 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.toedter.calendar.JDateChooser;
 import controller.StudentManagementController;
 import model.Course;
+import model.CourseList;
 import model.Student;
 
 import java.awt.Color;
@@ -24,16 +25,16 @@ import static javax.swing.JOptionPane.YES_OPTION;
 
 public class FormInputView extends JFrame {
 
-    private JPanel formInputPane;
-    private JTextField textField_name;
-    private ButtonGroup btng_gender;
-    private JRadioButton rdbtn_male;
-    private JRadioButton rdbtn_female;
-    private JTextField textField_id;
-    private JDateChooser dateChooser;
-    private JComboBox comboBox_course;
-    private JTextField textField_total;
-    private JTextField textField_status;
+    public JPanel formInputPane;
+    public JTextField textField_name;
+    public ButtonGroup btng_gender;
+    public JRadioButton rdbtn_male;
+    public JRadioButton rdbtn_female;
+    public JTextField textField_id;
+    public JDateChooser dateChooser;
+    public JComboBox comboBox_course;
+    public JTextField textField_total;
+    public JTextField textField_status;
 
     public String command;
 
@@ -127,7 +128,7 @@ public class FormInputView extends JFrame {
 
         comboBox_course = new JComboBox();
         comboBox_course.setBounds(77, 272, 250, 35);
-        ArrayList<Course> courseList = Course.getCourseList();
+        ArrayList<Course> courseList = CourseList.getCourseList();
         for (Course c : courseList) {
             comboBox_course.addItem(c.getId());
         }
@@ -210,7 +211,7 @@ public class FormInputView extends JFrame {
         catch (Exception e) {
             errorEmpty+="\nCourse is null";
         }
-        Course course = Course.getCourseById(courseName);
+        Course course = CourseList.getCourseById(courseName);
         float total = 0;
         try {
             String floatString = textField_total.getText();

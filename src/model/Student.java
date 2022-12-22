@@ -111,7 +111,7 @@ public class Student implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return Float.compare(student.total, total) == 0 && name.equals(student.name) && id.equals(student.id) && gender.equals(student.gender) && dob.equals(student.dob) && course.equals(student.course) && status.equals(student.status);
+        return Float.compare(student.total, total) == 0 && Objects.equals(name, student.name) && Objects.equals(id, student.id) && Objects.equals(gender, student.gender) && Objects.equals(dob, student.dob) && Objects.equals(course, student.course) && Objects.equals(status, student.status);
     }
 
     @Override

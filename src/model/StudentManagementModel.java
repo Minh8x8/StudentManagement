@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class StudentManagementModel {
     private ArrayList<Student> studentList = new ArrayList<Student>();
@@ -33,5 +34,18 @@ public class StudentManagementModel {
     }
     public void updateStudent(Student student, int i) {
         studentList.set(i, student);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StudentManagementModel that = (StudentManagementModel) o;
+        return Objects.equals(studentList, that.studentList) && Objects.equals(fileName, that.fileName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(studentList, fileName);
     }
 }

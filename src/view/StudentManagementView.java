@@ -94,7 +94,7 @@ public class StudentManagementView extends JFrame {
         menuOpen.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Handle the action event
-                controller.openFile();
+                controller.menuOpen();
             }
         });
         menuFile.add(menuOpen);
